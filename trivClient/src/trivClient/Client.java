@@ -7,53 +7,30 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.function.Consumer;
 import java.util.ArrayList;
+import java.util.Random;
 
 
 public class Client {
 
-    private int port;
-    private InetAddress IP;
+    //gets the local host as the ip address
+    private InetAddress IP = InetAddress.getLocalHost();
     Connection connection = new Connection();
-    private boolean validSettings = false;
     private Consumer<Serializable> callback;
     boolean connected = false;
-    int p1Score, p2Score, p3Score;
-    int numPlayers;
-    int myPlayerID;
-    String p1Move, p2Move, p3Move;
-    String returnThisString;
-    ArrayList activePlayers = new ArrayList();
+
+    //string for question, arraylist<string> for answers
+    String question;
+    ArrayList<String> answers = new ArrayList<String>();
+
+    ArrayList<String> randomized_answers = new ArrayList<String>();
 
     //default constructor
     public Client(Consumer<Serializable> callback) {
         this.callback = callback;
     }
 
-    //get and set of port
-    public int getPort() {
-        return port;
-    }
-    public void setPort(int newPort) {
-        this.port = newPort;
-    }
 
-    //get and set of IP
-    public InetAddress getIP() {
-        return IP;
-    }
-    public void setIP(InetAddress newIP) {
-        this.IP = newIP;
-    }
-
-    //get and set of validsettings
-    public boolean isValid() {
-        return validSettings;
-    }
-    public void setValid(boolean valid) {
-        this.validSettings = valid;
-    }
-
-    //send data
+    //send data, expecting to send one of the answers based on button clicked
     public void sendInfo(Serializable data) {
         try {
             connection.output.writeObject(data);
@@ -104,25 +81,16 @@ public class Client {
 
                 //take in input
                 while(connected) {
-                    //will receive current number of players
-                    //will receive own player iD
-                    //will receive a string full of all the information and will put into GUI
+                    //will receive question as string
+                    //will receive answers as arraylist<string>
 
-                    Serializable players = (Serializable) input.readObject();
-                    numPlayers = (Integer) players;
+                    Serializable new_question = (Serializable) input.readObject();
+                    question = new_question;
 
-                    for (int i=0; i < numPlayers; i++) {
-                        Serializable areTheyPlaying = (Serializable) input.readObject();
-                        activePlayers.add(areTheyPlaying);
-                    }
+                    Serializable new_answers = (Serializable) input.readObject();
+                    answers = new_answers;
 
-                    Serializable myID = (Serializable) input.readObject();
-                    myPlayerID = (Integer) myID;
-
-                    Serializable playerInfo = (Serializable) input.readObject();
-                    returnThisString = (String) playerInfo;
-
-                    callback.accept("Changes made");
+                    callback.accept("question and answers received from server");
                     activePlayers.clear();
                 }
 
@@ -143,4 +111,22 @@ public class Client {
         }//end of run
 
     }//end of connection class
+
+
+    //this will randomize the answers received from server and put into randomized_answers
+    public void setRandomized_answers() {
+
+        Random random = new Random();
+        int answer_index_size = answers.size();
+
+        for (int i=answer_index_size; i>0; i--) {
+            int randAns = random.nextInt(i);
+            randomized_answers.add(answers.get(i));
+        }
+    }
+
+    //clear out the randomized answers
+    public void clearRandomized_answers() {
+        randomized_answers.clear();
+    }
 }
