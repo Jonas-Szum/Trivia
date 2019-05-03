@@ -1,4 +1,3 @@
-package Server;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -68,7 +67,7 @@ public class Main extends Application {
         Player2Move = new Text("Player 2: " + p2Score + "\nMove: " + p2Move);
 
 
-        VBox Sproperties = new VBox(welcomeText, portRequest, onButton, offButton, portInputText);
+        VBox Sproperties = new VBox(welcomeText, onButton, offButton, portInputText);
         Sproperties.setSpacing(10);
         Sproperties.setAlignment(Pos.CENTER);
 
@@ -80,38 +79,45 @@ public class Main extends Application {
 
         //welcome page - action events
         //makes sure the port entered is a number
-        portRequest.setOnAction(event -> {
-            try {
-                if (!gameServer.active) {
-                    portNumber = Integer.parseInt(portRequest.getText());
-                    portInputText.setText("Port number:" + portRequest.getText());
-                    gameServer.setPort(portNumber);
-                    gameServer.validPort = true;
-                }
-            }
-            catch (Exception e){
-                e.printStackTrace();
-                portInputText.setText("Port number:" + " needs to be a number");
-            }
-        });
-
+        
+        
+        portInputText.setText("Port number:" + gameServer.getPort()); // do this instantly
+        gameServer.turnOnServer(); //will set sefrver to active
+        
+        
+        //set this fixed in server 
+//        portRequest.setOnAction(event -> {
+//            try {
+//                if (!gameServer.active) {
+//                    portNumber = Integer.parseInt(portRequest.getText());
+//                    portInputText.setText("Port number:" + portRequest.getText());
+//                    gameServer.setPort(portNumber);
+//                    gameServer.validPort = true;
+//                }
+//            }
+//            catch (Exception e){
+//                e.printStackTrace();
+//                portInputText.setText("Port number:" + " needs to be a number");
+//            }
+//        });
+         //se this automaticly in server main
         //when port is chosen, start connection on server
-        onButton.setOnAction(event -> {
-            if (gameServer.validPort && !gameServer.active) {
-                gameServer.turnOnServer();
-                gameplay.setVisible(true);
-                onButton.setText("Server is on");
-                offButton.setText("Turn off the server");
-            }
-            else if (gameServer.validPort && gameServer.active) {
-                onButton.setText("Server is already on");
-                portInputText.setText("Port number: " + portNumber);
-            }
-            else {
-                portInputText.setText("Port number: invalid port");
-                System.out.println("Server is either already on, or you have an invalid port");
-            }
-        });
+//        onButton.setOnAction(event -> {
+//            if (gameServer.validPort && !gameServer.active) {
+//                gameServer.turnOnServer();
+//                gameplay.setVisible(true);
+//                onButton.setText("Server is on");
+//                offButton.setText("Turn off the server");
+//            }
+//            else if (gameServer.validPort && gameServer.active) {
+//                onButton.setText("Server is already on");
+//                portInputText.setText("Port number: " + portNumber);
+//            }
+//            else {
+//                portInputText.setText("Port number: invalid port");
+//                System.out.println("Server is either already on, or you have an invalid port");
+//            }
+//        });
 
         offButton.setOnAction(event -> {
                 try {
@@ -138,14 +144,20 @@ public class Main extends Application {
                 numPlayers = gameServer.numPlayers;
                 totalPlayers.setText("# Players: " + numPlayers);
 
-                p1Move = gameServer.p1Move;
+                p1Move = gameServer.p1Move;   //tells you if your answer was correct or wrong
                 p2Move = gameServer.p2Move;
+                p3Move = gameServer.p3Move;
+                p4Move = gameServer.p4Move;
 
                 p1Score = Integer.toString(gameServer.p1Score);
                 p2Score = Integer.toString(gameServer.p2Score);
+                p1Score = Integer.toString(gameServer.p1Score);
+                p2Score = Integer.toString(gameServer.p2Score);
 
-                Player1Move.setText("\nPlayer 1: " + p1Score + "\nMove: " + p1Move);
-                Player2Move.setText("\nPlayer 2: " + p2Score + "\nMove: " + p2Move);
+                Player1Move.setText("\nPlayer 1: " + p1Score + "\nAnd their answer was: " + p1Move);
+                Player2Move.setText("\nPlayer 2: " + p2Score + "\nAnd their answer was: " + p2Move);
+                Player3Move.setText("\nPlayer 3: " + p1Score + "\nAnd their answer was:" + p3Move);
+                Player4Move.setText("\nPlayer 4: " + p2Score + "\nAnd their answer was: " + p4Move);
 
                 if (gameServer.gameOver) {
                     winner.setText("\nWinner: " + gameServer.winner);
