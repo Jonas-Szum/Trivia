@@ -17,6 +17,7 @@ public class Client {
     Connection connection = new Connection();
     private Consumer<Serializable> callback;
     boolean connected = false;
+    ArrayList<Integer> player_scores = new ArrayList<Integer>();
 
     //string for question, arraylist<string> for answers
     String question;
@@ -83,12 +84,20 @@ public class Client {
                 while(connected) {
                     //will receive question as string
                     //will receive answers as arraylist<string>
+                    //will receive player scores as an arraylist<int>
 
+                    //this is the question picked by the server
                     Serializable new_question = (Serializable) input.readObject();
                     question = new_question;
 
+                    //this is the answer related to the question
                     Serializable new_answers = (Serializable) input.readObject();
                     answers = new_answers;
+
+                    //this is the set of scores for each player (set by indices,
+                    //so like P1 should always be index 0, P2 should be index 1, etc...
+                    Serializable new_scores = (Serializable) input.readObject();
+                    player_scores = new_scores;
 
                     callback.accept("question and answers received from server");
                     activePlayers.clear();
