@@ -13,12 +13,11 @@ import java.util.Hashtable;
 
 public class Server {
 
-    private int port;
+    private int port = 5555;
     private ServerSocket server_socket;
     boolean active = false;
     boolean validPort = false;
     volatile ArrayList<Integer> playerScores;
-    volatile ArrayList<String>  playerMoves;
     Consumer<Serializable> callback;
     boolean gameOver = false;
     String winner;
@@ -26,6 +25,7 @@ public class Server {
     int maxPlayers = 4;
     int clientIDs = 1;
     volatile ArrayList<Integer> answerOrder;
+    volatile ArrayList<Boolean> playerCorrectAnswer;
     volatile boolean calculated = false;
     volatile QnA myTrivia;
     volatile String question = "";
@@ -37,11 +37,11 @@ public class Server {
     public Server(Consumer<Serializable> callback) {
         this.callback = callback;
         playerScores = new ArrayList<Integer>(); //can now handle any amount of players
-        playerMoves = new ArrayList<String>();
+        answerOrder = new ArrayList<Integer>();
+        playerCorrectAnswer = new ArrayList<Boolean>();
         for(int i = 0; i < maxPlayers; i++)
         {
             playerScores.add(0);
-            playerMoves.add("");
             myTrivia = new QnA();
             myTrivia.roll_question();
             question = myTrivia.get_question();
@@ -123,7 +123,6 @@ public class Server {
         Socket s;
         ObjectInputStream input;
         ObjectOutputStream output;
-        String ClientMove;
         boolean madeMove = false;
         int playerScore = 0;
         int playerID;
@@ -140,22 +139,30 @@ public class Server {
                     ObjectInputStream in = new ObjectInputStream(s.getInputStream());
                     this.output = out;
                     this.input = in;
+                    playerID = numPlayers;
                     numPlayers++;
                     updateClients();
                     callback.accept("Found connection");
 
                     while(true) {
-                    	out.writeObject(question);
-                    	out.writeObject(answers);
+                    	if(numPlayers == 4) { //first 3 players wait until there's a 4th
+                    	output.writeObject(question);
+                    	output.writeObject(answers);
                         //send the question, answer combo
                     	//wait to recieve answer
-                    	Serializable playerAnswer = (Serializable)in.readObject();
+                    	Serializable playerAnswer = (Serializable)input.readObject();
+                    	
                     	calculated = false; //after first player answers again, calculated is false
+                    	String playerAnswerStr = (String)playerAnswer;
+                    	synchronized(this) { //make sure threads don't confuse eachother, each index corresponds to answer order
                     	answerOrder.add(playerID);
+                    	playerCorrectAnswer.add(playerAnswerStr.equals(answers.get(0))); //compare player answer to actual answer
+                    	}
                     	if(answerOrder.size() == 4)
                     		calculateRound(); //if you are not versing anyone, currentOpponent is -1, go to calculateRound to see why
                     	else
                     		while(calculated == false) {}
+                    	}
                     }
                 } //end of if not null
 
@@ -176,11 +183,14 @@ public class Server {
     //calculates who won the round, and the game
     private synchronized void calculateRound() {
     //send information to all 4 players
-    
+    int scoreToAdd = 4;
+    //set scores in an arrayList
+    updateClients();
     myTrivia.roll_question();
     question = myTrivia.get_question();
     answers = myTrivia.get_answers();
     answerOrder.clear();
+    playerCorrectAnswer.clear();
     calculated = true;
     } //end of calculateround
 
@@ -189,18 +199,8 @@ public class Server {
     private synchronized void updateClients() {
         try {
             for (Connection conn : connectionList) { //update everyone
-                if (conn != null) {
-                    if (conn.s != null) {
-                        String playerInformation = "Not yet Implemented";
-                        conn.output.writeObject(numPlayers);		//send how many players are connected
-                        for(int i = 0; i < numPlayers; i++)
-                        {
-                            conn.output.writeObject(connectionList.get(i).alreadyInGame); //send all users information regarding whether or not a user is in a game already
-                        }
-                        conn.output.writeObject(conn.playerID); //write the connection's playerID
-                        conn.output.writeObject(playerInformation); //send all user turns to clients
-                    }
-                }
+            	conn.output.writeObject(numPlayers);
+                conn.output.writeObject(playerScores); 
             }
         }
         catch (Exception e) {
