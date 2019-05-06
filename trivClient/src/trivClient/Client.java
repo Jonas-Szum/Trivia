@@ -13,6 +13,7 @@ import java.util.Random;
 public class Client {
 
     //gets the local host as the ip address
+    private int Port = 5555;
     private InetAddress IP = InetAddress.getLocalHost();
     Connection connection = new Connection();
     private Consumer<Serializable> callback;
