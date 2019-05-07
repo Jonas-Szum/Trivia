@@ -20,6 +20,7 @@ public class Client {
     boolean connected = false;
     ArrayList<Integer> player_scores = new ArrayList<Integer>();
     int num_players;
+    boolean gameOver;
 
     //string for question, arraylist<string> for answers
     String question;
@@ -147,5 +148,17 @@ public class Client {
     //clear out the randomized answers
     public void clearRandomized_answers() {
         randomized_answers.clear();
+    }
+
+    
+    //checks if the game is over. game is over if someone has 10 or more points
+    public void gameOver() {
+        for (int i=0; player_scores.size(); i++) {
+            if (player_scores.get(i) >= 10) {
+                gameOver = true;
+                return;
+            }
+        }
+        gameOver = false;
     }
 }
