@@ -97,7 +97,7 @@ public class QnA {
     }
 
     String get_question() {
-    	return question;
+        return question;
     }
 
     ArrayList<String> get_answers() {

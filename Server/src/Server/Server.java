@@ -183,7 +183,18 @@ public class Server {
     //calculates who won the round, and the game
     private synchronized void calculateRound() {
     //send information to all 4 players
-    int scoreToAdd = 4;
+    int scoreToAdd = maxPlayers; 
+    for(int i = 0; i < maxPlayers; i++)
+    {
+    	if(playerCorrectAnswer.get(i) == true) //if the player got an answer right
+    	{
+    		int addScore = playerScores.get(i) + scoreToAdd;
+    		playerScores.set(i, addScore); //add the new score to the current score
+    		if(addScore >= 10)
+    			gameOver = true;
+    	}
+    	i--; //subtract the score to be added, even when the player is wrong
+    }
     //set scores in an arrayList
     updateClients();
     myTrivia.roll_question();
@@ -200,7 +211,7 @@ public class Server {
         try {
             for (Connection conn : connectionList) { //update everyone
             	conn.output.writeObject(numPlayers);
-                conn.output.writeObject(playerScores); 
+                conn.output.writeObject(playerScores);
             }
         }
         catch (Exception e) {
