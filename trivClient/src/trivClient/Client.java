@@ -89,14 +89,16 @@ public class Client {
                     //will receive num players to check if there are 4 players
                     //will receive player scores as an arraylist<int>
 
-                    //the # of players
-                    Serializable new_players = (Serializable) input.readObject();
-                    num_players = new_players;
+                    if (num_players < 4) {
+                        //the # of players
+                        Serializable new_players = (Serializable) input.readObject();
+                        num_players = new_players;
 
-                    //this is the set of scores for each player (set by indices,
-                    //so like P1 should always be index 0, P2 should be index 1, etc...
-                    Serializable new_scores = (Serializable) input.readObject();
-                    player_scores = new_scores;
+                        //this is the set of scores for each player (set by indices,
+                        //so like P1 should always be index 0, P2 should be index 1, etc...
+                        Serializable new_scores = (Serializable) input.readObject();
+                        player_scores = new_scores;
+                    }
 
                     //will receive question as string
                     //will receive answers as arraylist<string>
@@ -108,6 +110,21 @@ public class Client {
                         //this is the answer related to the question
                         Serializable new_answers = (Serializable) input.readObject();
                         answers = new_answers;
+
+
+                        //this is going to be where we do a SendInfo call, but this needs to be related to
+                        //a button click. after, then we calculate round from Server side
+                        //and this will push the num_players and player_scores
+
+
+                        //the # of players
+                        Serializable new_players = (Serializable) input.readObject();
+                        num_players = new_players;
+
+                        //this is the set of scores for each player (set by indices,
+                        //so like P1 should always be index 0, P2 should be index 1, etc...
+                        Serializable new_scores = (Serializable) input.readObject();
+                        player_scores = new_scores;
                     }
 
                     callback.accept("question and answers received from server");
@@ -150,7 +167,7 @@ public class Client {
         randomized_answers.clear();
     }
 
-    
+
     //checks if the game is over. game is over if someone has 10 or more points
     public void gameOver() {
         for (int i=0; player_scores.size(); i++) {
