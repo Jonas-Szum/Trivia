@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.util.function.Consumer;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Collections;
 
 
 public class Client {
@@ -111,6 +112,8 @@ public class Client {
                         Serializable new_answers = (Serializable) input.readObject();
                         answers = new_answers;
 
+                        callback.accept("question and answers received from server");
+
 
                         //this is going to be where we do a SendInfo call, but this needs to be related to
                         //a button click. after, then we calculate round from Server side
@@ -127,7 +130,7 @@ public class Client {
                         player_scores = new_scores;
                     }
 
-                    callback.accept("question and answers received from server");
+                    callback.accept("scores received");
                     activePlayers.clear();
                 }
 
@@ -153,13 +156,15 @@ public class Client {
     //this will randomize the answers received from server and put into randomized_answers
     public void setRandomized_answers() {
 
-        Random random = new Random();
-        int answer_index_size = answers.size();
+        ArrayList<Integer> shuffled_answers = new ArrayList<Integer>
 
-        for (int i=answer_index_size; i>0; i--) {
-            int randAns = random.nextInt(i);
-            randomized_answers.add(answers.get(i));
+        shuffled_answers = Collections.shuffle(answers);
+        for (int i=0; i<shuffled_answers.size();i++) {
+            System.out.println(shuffled_answers.get(i));
         }
+
+
+
     }
 
     //clear out the randomized answers
