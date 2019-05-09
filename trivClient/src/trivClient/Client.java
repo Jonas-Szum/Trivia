@@ -1,4 +1,4 @@
-package trivClient;
+
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -14,8 +14,9 @@ import java.util.Collections;
 public class Client {
 
     //gets the local host as the ip address
-    private int Port = 5555;
-    private InetAddress IP = InetAddress.getLocalHost();
+    private int Port = 5555;   
+    private InetAddress IP ;
+
     Connection connection = new Connection();
     private Consumer<Serializable> callback;
     boolean connected = false;
@@ -30,7 +31,13 @@ public class Client {
     ArrayList<String> randomized_answers = new ArrayList<String>();
 
     //default constructor
-    public Client(Consumer<Serializable> callback) {
+    public Client (Consumer<Serializable> callback) {
+    	try{
+    	 IP =  InetAddress.getByName("127.0.0.1");
+    	}
+    	catch(Exception e){
+    		
+    	}
         this.callback = callback;
     }
 
@@ -76,7 +83,7 @@ public class Client {
 
         public void run() {
             try {
-                s = new Socket(getIP(),getPort());
+                s = new Socket(IP,Port);
 
                 output = new ObjectOutputStream(s.getOutputStream());
                 input = new ObjectInputStream(s.getInputStream());
@@ -93,12 +100,12 @@ public class Client {
                     if (num_players < 4) {
                         //the # of players
                         Serializable new_players = (Serializable) input.readObject();
-                        num_players = new_players;
+                        num_players = (int) new_players;
 
                         //this is the set of scores for each player (set by indices,
                         //so like P1 should always be index 0, P2 should be index 1, etc...
                         Serializable new_scores = (Serializable) input.readObject();
-                        player_scores = new_scores;
+                        player_scores = (ArrayList) new_scores;
                     }
 
                     //will receive question as string
@@ -106,11 +113,11 @@ public class Client {
                     if (num_players == 4) {
                         //this is the question picked by the server
                         Serializable new_question = (Serializable) input.readObject();
-                        question = new_question;
+                        question = (String)new_question;
 
                         //this is the answer related to the question
                         Serializable new_answers = (Serializable) input.readObject();
-                        answers = new_answers;
+                        answers = (ArrayList)new_answers;
 
                         setRandomized_answers();
                         callback.accept("question and answers received from server");
@@ -123,16 +130,15 @@ public class Client {
 
                         //the # of players
                         Serializable new_players = (Serializable) input.readObject();
-                        num_players = new_players;
+                        num_players = (int)new_players;
 
                         //this is the set of scores for each player (set by indices,
                         //so like P1 should always be index 0, P2 should be index 1, etc...
                         Serializable new_scores = (Serializable) input.readObject();
-                        player_scores = new_scores;
+                        player_scores = (ArrayList)new_scores;
                     }
 
                     callback.accept("scores received");
-                    activePlayers.clear();
                 }
 
 
@@ -157,9 +163,10 @@ public class Client {
     //this will randomize the answers received from server and put into randomized_answers
     public void setRandomized_answers() {
 
-        ArrayList<Integer> shuffled_answers = new ArrayList<Integer>
+        ArrayList<String> shuffled_answers = new ArrayList<String>();
 
-        shuffled_answers = Collections.shuffle(answers);
+        Collections.shuffle(answers);
+        shuffled_answers = (ArrayList<String>) answers.clone();
         for (int i=0; i<shuffled_answers.size();i++) {
             System.out.println(shuffled_answers.get(i));
         }
@@ -176,7 +183,7 @@ public class Client {
 
     //checks if the game is over. game is over if someone has 10 or more points
     public void gameOver() {
-        for (int i=0; player_scores.size(); i++) {
+        for (int i=0; i <  player_scores.size(); i++) {
             if (player_scores.get(i) >= 10) {
                 gameOver = true;
                 return;
