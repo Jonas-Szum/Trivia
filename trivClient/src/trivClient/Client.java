@@ -112,6 +112,7 @@ public class Client {
                         Serializable new_answers = (Serializable) input.readObject();
                         answers = new_answers;
 
+                        setRandomized_answers();
                         callback.accept("question and answers received from server");
 
 
